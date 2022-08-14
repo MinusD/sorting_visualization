@@ -1,4 +1,5 @@
 import random
+import time
 import numpy as np
 import os
 import sys
@@ -29,9 +30,9 @@ class Visualizer(list):
 
         # self.create_tmp_dir()
         self.counter = 0
-        self.is_start = True
-        self.out = cv2.VideoWriter('output_video.avi', cv2.VideoWriter_fourcc(*'XVID'), cfg.FRAME_PER_SECOND,
-                                   [self.img_width, self.img_height])
+        self.is_start = False
+        self.out = cv2.VideoWriter(f'output_video_{round(time.time())}.avi', cv2.VideoWriter_fourcc(*'XVID'),
+                                   cfg.FRAME_PER_SECOND, [self.img_width, self.img_height])
 
         debug(
             f'Приложение запущено\nШирина: {self.img_width}\nВысота: {self.img_height}\n'
@@ -48,11 +49,14 @@ class Visualizer(list):
 
     def add_background(self):
         """Добавляет вместо пустоты монотонный фон"""
-        for i in range(self.img_width):
-            for j in range(self.img_height):
-                r, g, b, a = self.pixels[i, j]
-                if a == 0:
-                    self.img.putpixel((i, j), cfg.BACKGROUND_COLOUR)
+        try:
+            for i in range(self.img_width):
+                for j in range(self.img_height):
+                    r, g, b, a = self.pixels[i, j]
+                    if a == 0:
+                        self.img.putpixel((i, j), cfg.BACKGROUND_COLOUR)
+        except Exception as e:
+            debug('Заполнение фона не произошло')
 
     def open_image(self):
         """Открывает изображение и сохраняет размеры"""
