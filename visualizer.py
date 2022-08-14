@@ -25,9 +25,9 @@ class Visualizer(list):
         self.pixels = None
         self.open_image()
         self.add_background()
-        super().__init__([[-1, (0, 0, 0, 0)]] * (self.img_width * self.img_height))
-        self.last_use = [[-1, (0, 0, 0, 0)]] * (self.img_width * self.img_height)
+        self.last_use = [[-1, (0, 0, 0)]] * (self.img_width * self.img_height)
         self.fill_list()
+        super().__init__(self.last_use.copy())
 
         # self.create_tmp_dir()
         self.counter = 0
@@ -72,7 +72,6 @@ class Visualizer(list):
     def fill_list(self):
         """Заполняет список информацией о картинке"""
         for i in range(self.img_width * self.img_height):
-            super().__setitem__(i, (i, self.get_pixel(i)))
             self.last_use[i] = [i, self.get_pixel(i)]
         debug('Пустые места заполнены')
 
@@ -116,23 +115,12 @@ class Visualizer(list):
             img = np.array(self.img.copy().convert('RGB'))
             img = img[:, :, ::-1].copy()
             self.out.write(img)
-        # self.img.save(f'tmp\\frame-{self.get_counter()}.png')
         self.counter += 1
 
     def save_video(self):
+        """Сохранение видео"""
         self.out.release()
         debug(f'Выполнено за {round(time.time() - self.timer, 3)} с.')
-        # for filename in glob.glob('tmp/*.png'):
-        #     img = cv2.imread(filename)
-        #     self.out.write(img)
-        # self.frames[0].save(
-        #     'animation.gif',
-        #     save_all=True,
-        #     append_images=self.frames[1:],
-        #     optimize=False,
-        #     # duration=0.000000001,
-        #     loop=1
-        # )
 
 
 def debug(data: Any):
