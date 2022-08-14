@@ -16,6 +16,7 @@ import config as cfg
 
 class Visualizer(list):
     def __init__(self):
+        self.timer = time.time()
         self.frames = []
         self.path = None
         self.img_height: int
@@ -120,7 +121,7 @@ class Visualizer(list):
 
     def save_video(self):
         self.out.release()
-        pass
+        debug(f'Выполнено за {round(time.time() - self.timer, 3)} с.')
         # for filename in glob.glob('tmp/*.png'):
         #     img = cv2.imread(filename)
         #     self.out.write(img)
