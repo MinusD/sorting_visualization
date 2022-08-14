@@ -5,10 +5,7 @@ import os
 import sys
 import glob
 from typing import Any
-
 import cv2
-import tkinter.ttk as ttk
-from tkinter import *
 from PIL import Image
 
 import config as cfg
