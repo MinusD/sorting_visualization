@@ -1,9 +1,11 @@
 import random
+import numpy as np
 import os
 import sys
 import glob
 from typing import Any
 
+import cv2
 import tkinter.ttk as ttk
 from tkinter import *
 from PIL import Image
@@ -13,6 +15,7 @@ import config as cfg
 
 class Visualizer(list):
     def __init__(self):
+        self.frames = []
         self.path = None
         self.img_height: int
         self.img_width: int
@@ -24,13 +27,18 @@ class Visualizer(list):
         self.last_use = [[-1, (0, 0, 0, 0)]] * (self.img_width * self.img_height)
         self.fill_list()
 
-        self.create_tmp_dir()
+        # self.create_tmp_dir()
         self.counter = 0
         self.is_start = True
+        self.out = cv2.VideoWriter('output_video.avi', cv2.VideoWriter_fourcc(*'XVID'), cfg.FRAME_PER_SECOND,
+                                   [self.img_width, self.img_height])
 
         debug(
             f'Приложение запущено\nШирина: {self.img_width}\nВысота: {self.img_height}\n'
-            f'Пиксели: {self.img_width * self.img_height} - {super().__len__()}')
+            f'Пиксели: {self.img_width * self.img_height}')
+
+    def start(self) -> None:
+        self.is_start = True
 
     def create_tmp_dir(self) -> None:
         """Создаёт временную директорию"""
@@ -44,12 +52,12 @@ class Visualizer(list):
             for j in range(self.img_height):
                 r, g, b, a = self.pixels[i, j]
                 if a == 0:
-                    self.img.putpixel((i, j), cfg.BACKGROUND_COLOR)
+                    self.img.putpixel((i, j), cfg.BACKGROUND_COLOUR)
 
     def open_image(self):
         """Открывает изображение и сохраняет размеры"""
         try:
-            self.img = Image.open('img2.png')
+            self.img = Image.open(cfg.IMG_FILENAME)
             self.pixels = self.img.load()
         except IOError:
             print("Не удалось открыть изображение")
@@ -61,14 +69,21 @@ class Visualizer(list):
         for i in range(self.img_width * self.img_height):
             super().__setitem__(i, (i, self.get_pixel(i)))
             self.last_use[i] = [i, self.get_pixel(i)]
+        debug('Пустые места заполнены')
 
     def get_pixel(self, i: int) -> list:
         """Массив с цветом пикселя"""
-        return [self.pixels[i // self.img_height, i % self.img_height]]
+        return [self.pixels[i % self.img_width, i // self.img_width]]
 
     def set_pixel(self, i, rgb) -> None:
         """Устанавливает цвет пикселя"""
-        self.img.putpixel((i // self.img_height, i % self.img_height), rgb)
+        self.img.putpixel((i % self.img_width, i // self.img_width), rgb)
+
+    def delay(self, seconds: int = 1):
+        for i in range(seconds * cfg.FRAME_PER_SECOND):
+            img = np.array(self.img.copy().convert('RGB'))
+            img = img[:, :, ::-1].copy()
+            self.out.write(img)
 
     def get_counter(self):
         """Счётчик с незначащими нулями"""
@@ -77,9 +92,7 @@ class Visualizer(list):
     def __getitem__(self, item):
         if self.is_start:
             pass
-            # self.save_frame()
-
-        # print(super().__getitem__(item))
+            # self.set_pixel(item, cfg.GETITEM_COLOUR)
         return super().__getitem__(item)[0]
 
     def __setitem__(self, key, value):
@@ -89,15 +102,32 @@ class Visualizer(list):
                 self.set_pixel(key, tuple(self.last_use[i][1]))
                 break
 
-        # self.set_pixel(key, 123)
         if self.is_start:
-            # pass
             self.save_frame()
 
     def save_frame(self):
         """Сохраняет кадр"""
-        self.img.save(f'tmp\\frame-{self.get_counter()}.png')
+        if self.counter % cfg.TIMEOUT_FRAMES == 0:
+            img = np.array(self.img.copy().convert('RGB'))
+            img = img[:, :, ::-1].copy()
+            self.out.write(img)
+        # self.img.save(f'tmp\\frame-{self.get_counter()}.png')
         self.counter += 1
+
+    def save_video(self):
+        self.out.release()
+        pass
+        # for filename in glob.glob('tmp/*.png'):
+        #     img = cv2.imread(filename)
+        #     self.out.write(img)
+        # self.frames[0].save(
+        #     'animation.gif',
+        #     save_all=True,
+        #     append_images=self.frames[1:],
+        #     optimize=False,
+        #     # duration=0.000000001,
+        #     loop=1
+        # )
 
 
 def debug(data: Any):
