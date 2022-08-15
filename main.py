@@ -14,23 +14,32 @@ def shuffle(vs: Visualizer):
 
 if __name__ == '__main__':
     data = Visualizer()
-    shuffle(data)
     data.start()
+    shuffle(data)
     data.delay()
 
-    # /* Сортировка вставками
+    # /* Сортировка пузырьком (Очень долгая, даже на маленькой картинке)
     '''
+    for i in range(len(data) - 1):
+        for j in range(len(data) - i - 1):
+            if data[j] > data[j + 1]:
+                data[j], data[j + 1] = data[j + 1], data[j]
+    '''
+    # Сортировка пузырьком */
+
+    # /* Сортировка вставками
+    # '''
     for i in range(len(data)):
         lowest_value_index = i
         for j in range(i + 1, len(data)):
             if data[j] < data[lowest_value_index]:
                 lowest_value_index = j
         data[i], data[lowest_value_index] = data[lowest_value_index], data[i]
-    '''
+    # '''
     # Сортировка вставками */
 
     # /* Сортировка Шелла
-
+    '''
     n = len(data)
     k = int(math.log2(n))
     interval = 2 ** k - 1
@@ -44,7 +53,7 @@ if __name__ == '__main__':
             data[j] = temp
         k -= 1
         interval = 2 ** k - 1
-
+    '''
     # Сортировка Шелла */
 
     data.save_video()

@@ -1,4 +1,4 @@
-IMG_FILENAME = 'img3.png'  # Картинка
+IMG_FILENAME = 'input\\img8.png'  # Картинка
 
 BACKGROUND_COLOUR = (100, 100, 100, 255)  # Цвет заливки прозрачного фона
 
